@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refrigerante Clicker</title>
+<style>
+  :root {
+    --primary-color: #4a90e2;
+    --secondary-color: #8e44ad;
+    --accent-color: #5a2ca0;
+    --ascension-color: #ff9800;
+    --reset-color: #e74c3c;
+    --ad-color: #27ae60;
+    --construction-color: #3498db;
+    --text-color: white;
+    --background-dark: rgba(0,0,0,0.3);
+    --health-color: limegreen;
+    --crit-color: #ff4757;
+    --bubble-color: rgba(255, 255, 255, 0.8);
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    user-select: none;
+    overflow-x: hidden;
+  }
+  
+  #version {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 14px;
+    background: var(--background-dark);
+    padding: 5px 10px;
+    border-radius: 8px;
+    z-index: 10;
+  }
+  
+  .container {
+    text-align: center;
+    padding-top: 50px;
+    flex: 1;
+    position: relative;
+  }
+  
+  #enemy {
+    width: 150px;
+    height: 200px;
+    margin: 20px auto;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.1s;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+  }
+  
+  #enemy:active {
+    transform: scale(0.95);
+  }
+  
+  .soda-can {
+    width: 100%;
+    height: 100%;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 200"><rect x="15" y="10" width="70" height="180" rx="5" fill="%23ff0000"/><rect x="20" y="15" width="60" height="170" rx="3" fill="%23ffffff"/><text x="50" y="100" font-family="Arial" font-size="12" text-anchor="middle" fill="%23000">REFRIGERANTE</text></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  
+  #healthBarContainer {
+    width: 300px;
+    height: 20px;
+    background: #333;
+    border-radius: 10px;
+    margin: 10px auto;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  
+  #healthBar {
+    height: 100%;
+    background: var(--health-color);
+    width: 100%;
+    transition: width 0.3s ease;
+  }
+  
+  .stats {
+    margin: 10px 0;
+    font-size: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  .stat-item {
+    background: var(--background-dark);
+    padding: 8px 15px;
+    border-radius: 20px;
+    min-width: 120px;
+  }
+  
+  button {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  
+  button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  }
+  
+  button:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  
+  button:disabled {
+    background: #666;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  #ascendButton {
+    background: var(--ascension-color);
+    display: none;
+  }
+  
+  #treeButton {
+    position: fixed;
+    bottom: 70px;
+    left: 20px;
+    font-size: 36px;
+    background: var(--primary-color);
+    padding: 15px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  #saveButton {
+    position: fixed;
+    bottom: 140px;
+    left: 20px;
+    font-size: 24px;
+    background: var(--accent-color);
+    padding: 15px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  #resetButton {
+    position: fixed;
+    bottom: 210px;
+    left: 20px;
+    font-size: 24px;
+    background: var(--reset-color);
+    padding: 15px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  #adButton {
+    position: fixed;
+    bottom: 280px;
+    left: 20px;
+    font-size: 24px;
+    background: var(--ad-color);
+    padding: 15px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+  }
+  
+  #constructionButton {
+    position: fixed;
+    bottom: 70px;
+    right: 20px;
+    font-size: 36px;
+    background: var(--construction-color);
+    padding: 15px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  #adButton:disabled {
+    background: #666;
+    cursor: not-allowed;
+  }
+  
+  #adButton.cooldown {
+    background: #666;
+    position: relative;
+  }
+  
+  #adButton.cooldown::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    border-radius: 50%;
+  }
+  
+  #skillMenu {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 300px;
+    height: 100%;
+    background: linear-gradient(135deg, #3f51b5, #9c27b0);
+    padding: 20px;
+    box-sizing: border-box;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+  }
+  
+  #skillMenu.open {
+    left: 0;
+  }
+  
+  #constructionMenu {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 300px;
+    height: 100%;
+    background: linear-gradient(135deg, #2c3e50, #3498db);
+    padding: 20px;
+    box-sizing: border-box;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.3);
+  }
+  
+  #constructionMenu.open {
+    right: 0;
+  }
+  
+  #ascensionMenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  #ascensionMenu.open {
+    display: flex;
+  }
+  
+  #resetMenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  #resetMenu.open {
+    display: flex;
+  }
+  
+  #adMenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  #adMenu.open {
+    display: flex;
+  }
+  
+  .ascension-content, .reset-content, .ad-content {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  #closeMenu {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  
+  #closeConstruction {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  
+  #closeAscension {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  
+  #closeReset {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  
+  #closeAd {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  
+  .skill {
+    background: var(--background-dark);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .construction {
+    background: rgba(52, 152, 219, 0.2);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid var(--construction-color);
+  }
+  
+  .ascension-skill {
+    background: rgba(255, 152, 0, 0.2);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid var(--ascension-color);
+  }
+  
+  .ad-reward {
+    background: rgba(39, 174, 96, 0.2);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid var(--ad-color);
+  }
+  
+  .skill-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .skill-title {
+    font-weight: bold;
+  }
+  
+  #attributes {
+    margin-top: 20px;
+    background: var(--background-dark);
+    padding: 15px;
+    border-radius: 8px;
+    display: inline-block;
+    text-align: left;
+  }
+  
+  .attribute {
+    margin: 8px 0;
+  }
+  
+  .boost-indicator {
+    background: rgba(39, 174, 96, 0.3);
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin: 2px;
+    font-size: 12px;
+    display: inline-block;
+  }
+  
+  .ad-timer {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 15px 0;
+    color: var(--ad-color);
+  }
+  
+  /* Bolhas de gás */
+  .bubble {
+    position: absolute;
+    background: var(--bubble-color);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 50;
+    animation: floatBubble 10s ease-in forwards;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    font-weight: bold;
+    font-size: 16px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    transition: transform 0.2s;
+  }
+  
+  .bubble:hover {
+    transform: scale(1.1);
+  }
+  
+  @keyframes floatBubble {
+    0% {
+      transform: translateY(100vh) scale(0.5);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+      transform: translateY(90vh) scale(0.7);
+    }
+    90% {
+      opacity: 1;
+      transform: translateY(10vh) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(0) scale(1.2);
+    }
+  }
+  
+  /* Animações e efeitos */
+  @keyframes clickEffect {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(2); opacity: 0; }
+  }
+  
+  @keyframes floatText {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-30px); opacity: 0; }
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  @keyframes glow {
+    0% { box-shadow: 0 0 5px var(--ascension-color); }
+    50% { box-shadow: 0 0 20px var(--ascension-color); }
+    100% { box-shadow: 0 0 5px var(--ascension-color); }
+  }
+  
+  @keyframes adGlow {
+    0% { box-shadow: 0 0 5px var(--ad-color); }
+    50% { box-shadow: 0 0 20px var(--ad-color); }
+    100% { box-shadow: 0 0 5px var(--ad-color); }
+  }
+  
+  @keyframes constructionGlow {
+    0% { box-shadow: 0 0 5px var(--construction-color); }
+    50% { box-shadow: 0 0 20px var(--construction-color); }
+    100% { box-shadow: 0 0 5px var(--construction-color); }
+  }
+  
+  .click-effect {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: clickEffect 0.5s ease-out;
+  }
+  
+  .damage-text {
+    position: absolute;
+    font-weight: bold;
+    pointer-events: none;
+    animation: floatText 1s ease-out;
+    font-size: 18px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+  }
+  
+  .crit-text {
+    color: var(--crit-color);
+    font-size: 22px;
+  }
+  
+  .notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .notification.show {
+    opacity: 1;
+  }
+  
+  .save-indicator {
+    position: fixed;
+    bottom: 70px;
+    right: 20px;
+    background: var(--background-dark);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .save-indicator.show {
+    opacity: 1;
+  }
+  
+  .cooldown-timer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 101;
+  }
+  
+  /* Responsividade */
+  @media (max-width: 768px) {
+    .stats {
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .stat-item {
+      width: 80%;
+      max-width: 250px;
+    }
+    
+    #healthBarContainer {
+      width: 80%;
+    }
+    
+    #skillMenu, #constructionMenu {
+      width: 80%;
+    }
+    
+    #skillMenu {
+      left: -80%;
+    }
+    
+    #constructionMenu {
+      right: -80%;
+    }
+    
+    #treeButton, #saveButton, #resetButton, #adButton, #constructionButton {
+      bottom: 60px;
+      width: 50px;
+      height: 50px;
+      font-size: 28px;
+    }
+    
+    #treeButton, #saveButton, #resetButton, #adButton {
+      left: 15px;
+    }
+    
+    #constructionButton {
+      right: 15px;
+    }
+    
+    #saveButton {
+      bottom: 120px;
+    }
+    
+    #resetButton {
+      bottom: 180px;
+    }
+    
+    #adButton {
+      bottom: 240px;
+    }
+    
+    .bubble {
+      font-size: 14px;
+    }
+  }
+  
+  /* Efeito de partículas */
+  .particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+  
+  .particle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    animation: float 15s infinite linear;
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translateY(100vh) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-100px) rotate(360deg);
+      opacity: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="version">vB.0.7.0</div>
+
+<div class="particles" id="particles"></div>
+
+<div class="container">
+  <div id="enemy">
+    <div class="soda-can"></div>
+  </div>
+  <div id="healthBarContainer">
+    <div id="healthBar"></div>
+  </div>
+  <div class="stats">
+    <div class="stat-item"><span id="level">Nível: 1</span></div>
+    <div class="stat-item"><span id="lataDisplay">Latas: 0</span></div>
+    <div class="stat-item"><span id="tampaDisplay">Tampas: 0</span></div>
+    <div class="stat-item"><span id="points">Pontos: 0</span></div>
+    <div class="stat-item"><span id="lataPerSecond">Latas/s: 0</span></div>
+  </div>
+  <div id="activeBoosts" style="margin: 10px 0;"></div>
+  <div>
+    <button id="buyHelper">Comprar Amigos (1 ponto)</button>
+    <button id="ascendButton">TAMPAR (Nível 50)</button>
+  </div>
+  <div id="attributes">
+    <div class="attribute">Chance Crítica: <span id="critAttr">0%</span></div>
+    <div class="attribute">Goles por Clique: <span id="clickAttr">1</span></div>
+    <div class="attribute">Ganho de Latas: <span id="gainAttr">1</span></div>
+    <div class="attribute">Multiplicador de Latas: <span id="lataMultiplierAttr">1x</span></div>
+    <div class="attribute">Multiplicador de Dano: <span id="damageMultiplierAttr">1x</span></div>
+    <div class="attribute">Dano dos Amigos: <span id="helperDpsAttr">0</span></div>
+  </div>
+</div>
+
+<button id="treeButton">🌳</button>
+<button id="saveButton">💾</button>
+<button id="resetButton">🔄</button>
+<button id="adButton">🎁</button>
+<button id="constructionButton">🏭</button>
+
+<div id="skillMenu">
+  <button id="closeMenu">✕</button>
+  <h3>Árvore de Habilidades</h3>
+  <div class="skill">
+    <div class="skill-info">
+      <span class="skill-title">Chance Crítica</span>
+      <span><span id="critLevel">0</span>/25</span>
+    </div>
+    <div class="skill-info">
+      <span>Custo: <span id="critCost">1</span> lata(s)</span>
+      <button id="buyCrit">Comprar</button>
+    </div>
+  </div>
+  <div class="skill">
+    <div class="skill-info">
+      <span class="skill-title">Goles por Clique</span>
+      <span><span id="clickPowerLevel">1</span>/20</span>
+    </div>
+    <div class="skill-info">
+      <span>Custo: <span id="clickPowerCost">1</span> lata(s)</span>
+      <button id="buyClickPower">Comprar</button>
+    </div>
+  </div>
+  <div class="skill">
+    <div class="skill-info">
+      <span class="skill-title">Ganho de Latas</span>
+      <span><span id="lataGainLevel">1</span>/100</span>
+    </div>
+    <div class="skill-info">
+      <span>Custo: <span id="lataGainCost">1</span> lata(s)</span>
+      <button id="buyLataGain">Comprar</button>
+    </div>
+  </div>
+  <div class="skill">
+    <div class="skill-info">
+      <span class="skill-title">Multiplicador de Latas</span>
+      <span><span id="lataMultiplierLevel">0</span>/10</span>
+    </div>
+    <div class="skill-info">
+      <span>Custo: <span id="lataMultiplierCost">10</span> lata(s)</span>
+      <button id="buyLataMultiplier">Comprar</button>
+    </div>
+  </div>
+  <div class="skill" id="damageMultiplierSkill" style="display: none;">
+    <div class="skill-info">
+      <span class="skill-title">Multiplicador de Dano</span>
+      <span><span id="damageMultiplierLevel">0</span>/20</span>
+    </div>
+    <div class="skill-info">
+      <span>Custo: <span id="damageMultiplierCost">50</span> lata(s)</span>
+      <button id="buyDamageMultiplier">Comprar</button>
+    </div>
+  </div>
+</div>
+
+<div id="constructionMenu">
+  <button id="closeConstruction">✕</button>
+  <h3>🏭 Construções</h3>
+  <p>Construções geram latas automaticamente por segundo!</p>
+  
+  <div class="construction">
+    <div class="skill-info">
+      <span class="skill-title">Máquina de Refrigerante</span>
+      <span><span id="construction1Level">0</span> unidades</span>
+    </div>
+    <div class="skill-info">
+      <span>Produção: <span id="construction1Production">0.1</span> latas/s</span>
+    </div>
+    <div class="skill-info">
+      <span>Custo: <span id="construction1Cost">10</span> lata(s)</span>
+      <button id="buyConstruction1">Comprar</button>
+    </div>
+  </div>
+  
+  <div class="construction">
+    <div class="skill-info">
+      <span class="skill-title">Fábrica de Latas</span>
+      <span><span id="construction2Level">0</span> unidades</span>
+    </div>
+    <div class="skill-info">
+      <span>Produção: <span id="construction2Production">1</span> latas/s</span>
+    </div>
+    <div class="skill-info">
+      <span>Custo: <span id="construction2Cost">1000</span> lata(s)</span>
+      <button id="buyConstruction2">Comprar</button>
+    </div>
+  </div>
+  
+  <div class="construction">
+    <div class="skill-info">
+      <span class="skill-title">Complexo Industrial</span>
+      <span><span id="construction3Level">0</span> unidades</span>
+    </div>
+    <div class="skill-info">
+      <span>Produção: <span id="construction3Production">10</span> latas/s</span>
+    </div>
+    <div class="skill-info">
+      <span>Custo: <span id="construction3Cost">100000</span> lata(s)</span>
+      <button id="buyConstruction3">Comprar</button>
+    </div>
+  </div>
+</div>
+
+<div id="ascensionMenu">
+  <div class="ascension-content">
+    <button id="closeAscension">✕</button>
+    <h2>🏆 Tampas 🏆</h2>
+    <p>Parabéns! Você alcançou o nível 50 e pode "tampar".</p>
+    <p>Ao "tampar", você perderá todo o progresso, mas manterá suas tampas.</p>
+    <p>Tampas: <span id="tampaPoints">0</span></p>
+    
+    <div class="ascension-skill">
+      <div class="skill-info">
+        <span class="skill-title">+10 Ganho de Latas</span>
+        <span><span id="tampaLataLevel">0</span>/5</span>
+      </div>
+      <div class="skill-info">
+        <span>Custo: <span id="tampaLataCost">1</span> tampa(s)</span>
+        <button id="buyTampaLata">Comprar</button>
+      </div>
+    </div>
+    
+    <div class="ascension-skill">
+      <div class="skill-info">
+        <span class="skill-title">+5 Goles por Clique</span>
+        <span><span id="tampaClickLevel">0</span>/10</span>
+      </div>
+      <div class="skill-info">
+        <span>Custo: <span id="tampaClickCost">1</span> tampa(s)</span>
+        <button id="buyTampaClick">Comprar</button>
+      </div>
+    </div>
+    
+    <div class="ascension-skill">
+      <div class="skill-info">
+        <span class="skill-title">+2% Chance Crítica</span>
+        <span><span id="tampaCritLevel">0</span>/25</span>
+      </div>
+      <div class="skill-info">
+        <span>Custo: <span id="tampaCritCost">1</span> tampa(s)</span>
+        <button id="buyTampaCrit">Comprar</button>
+      </div>
+    </div>
+    
+    <div class="ascension-skill">
+      <div class="skill-info">
+        <span class="skill-title">+1% Dano dos Amigos</span>
+        <span><span id="tampaHelperLevel">0</span>/10</span>
+      </div>
+      <div class="skill-info">
+        <span>Custo: <span id="tampaHelperCost">1</span> tampa(s)</span>
+        <button id="buyTampaHelper">Comprar</button>
+      </div>
+    </div>
+    
+    <button id="confirmAscension" style="background: var(--ascension-color); margin-top: 20px; padding: 15px; font-size: 18px;">
+      CONFIRMAR TAMPA
+    </button>
+  </div>
+</div>
+
+<div id="resetMenu">
+  <div class="reset-content">
+    <button id="closeReset">✕</button>
+    <h2>🔄 Resetar Jogo</h2>
+    <p>Tem certeza que deseja resetar completamente seu progresso?</p>
+    <p>Esta ação não pode ser desfeita!</p>
+    <p>Você perderá todas as latas, níveis, habilidades e tampas.</p>
+    
+    <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+      <button id="cancelReset" style="background: #666; padding: 10px 20px;">
+        Cancelar
+      </button>
+      <button id="confirmReset" style="background: var(--reset-color); padding: 10px; font-size: 16px;">
+        RESETAR TUDO
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="adMenu">
+  <div class="ad-content">
+    <button id="closeAd">✕</button>
+    <h2>🎁 Recompensa por Anúncio</h2>
+    <p>Assista um curto anúncio para receber uma recompensa especial!</p>
+    <p>Cooldown: 10 minutos</p>
+    
+    <div class="ad-timer" id="adTimer">15</div>
+    <p>Espere o timer chegar a 0 para receber sua recompensa!</p>
+    
+    <div class="ad-reward">
+      <div class="skill-info">
+        <span class="skill-title">Possíveis Recompensas:</span>
+      </div>
+      <div style="text-align: left; margin-top: 10px;">
+        <p>• <strong>2X Ganho de Latas</strong> - Duração: 5 minutos</p>
+        <p>• <strong>2X Goles por Clique</strong> - Duração: 5 minutos</p>
+      </div>
+    </div>
+    
+    <button id="watchAd" style="background: var(--ad-color); margin-top: 20px; padding: 15px; font-size: 18px;" disabled>
+      AGUARDE... <span id="watchAdTimer">15</span>
+    </button>
+  </div>
+</div>
+
+<div class="notification" id="notification"></div>
+<div class="save-indicator" id="saveIndicator">Jogo Salvo!</div>
+
+<script>
+// Variáveis do jogo
+let latas = 0;
+let tampas = 0;
+let points = 0;
+let level = 1;
+let enemyMaxHp = 10;
+let enemyHp = enemyMaxHp;
+let golesPorClique = 1;
+let critChance = 0;
+let critMultiplier = 2;
+let lataGain = 1;
+let lataMultiplier = 1;
+let damageMultiplier = 1;
+let amigosLevel = 0;
+let amigosCost = 1;
+let critLevel = 0, golesPorCliqueLevel = 1, lataGainLevel = 1, lataMultiplierLevel = 0, damageMultiplierLevel = 0;
+let critCost = 1, golesPorCliqueCost = 1, lataGainCost = 1, lataMultiplierCost = 10, damageMultiplierCost = 50;
+
+// Variáveis de tampas
+let tampaPoints = 0;
+let tampaLataLevel = 0;
+let tampaClickLevel = 0;
+let tampaCritLevel = 0;
+let tampaHelperLevel = 0;
+let tampaLataCost = 1;
+let tampaClickCost = 1;
+let tampaCritCost = 1;
+let tampaHelperCost = 1;
+
+// Variáveis de anúncio
+let adCooldown = 0; // em segundos
+let adTimer = 15; // timer de 15 segundos para receber recompensa
+let adTimerInterval = null;
+let activeBoosts = {
+  lataGain: { active: false, endTime: 0, multiplier: 1 },
+  clickPower: { active: false, endTime: 0, multiplier: 1 }
+};
+
+// Variáveis de construções
+let constructions = {
+  1: { level: 0, baseCost: 10, baseProduction: 0.1, name: "Máquina de Refrigerante" },
+  2: { level: 0, baseCost: 1000, baseProduction: 1, name: "Fábrica de Latas" },
+  3: { level: 0, baseCost: 100000, baseProduction: 10, name: "Complexo Industrial" }
+};
+
+// Elementos DOM
+const healthBar = document.getElementById("healthBar");
+const levelDisplay = document.getElementById("level");
+const lataDisplay = document.getElementById("lataDisplay");
+const tampaDisplay = document.getElementById("tampaDisplay");
+const pointsDisplay = document.getElementById("points");
+const lataPerSecondDisplay = document.getElementById("lataPerSecond");
+const enemy = document.getElementById("enemy");
+const critAttr = document.getElementById("critAttr");
+const clickAttr = document.getElementById("clickAttr");
+const gainAttr = document.getElementById("gainAttr");
+const lataMultiplierAttr = document.getElementById("lataMultiplierAttr");
+const damageMultiplierAttr = document.getElementById("damageMultiplierAttr");
+const helperDpsAttr = document.getElementById("helperDpsAttr");
+const notification = document.getElementById("notification");
+const saveIndicator = document.getElementById("saveIndicator");
+const particlesContainer = document.getElementById("particles");
+const ascendButton = document.getElementById("ascendButton");
+const ascensionMenu = document.getElementById("ascensionMenu");
+const resetMenu = document.getElementById("resetMenu");
+const adMenu = document.getElementById("adMenu");
+const constructionMenu = document.getElementById("constructionMenu");
+const adButton = document.getElementById("adButton");
+const constructionButton = document.getElementById("constructionButton");
+const tampaPointsDisplay = document.getElementById("tampaPoints");
+const tampaLataLevelDisplay = document.getElementById("tampaLataLevel");
+const tampaClickLevelDisplay = document.getElementById("tampaClickLevel");
+const tampaCritLevelDisplay = document.getElementById("tampaCritLevel");
+const tampaHelperLevelDisplay = document.getElementById("tampaHelperLevel");
+const tampaLataCostDisplay = document.getElementById("tampaLataCost");
+const tampaClickCostDisplay = document.getElementById("tampaClickCost");
+const tampaCritCostDisplay = document.getElementById("tampaCritCost");
+const tampaHelperCostDisplay = document.getElementById("tampaHelperCost");
+const damageMultiplierSkill = document.getElementById("damageMultiplierSkill");
+const activeBoostsContainer = document.getElementById("activeBoosts");
+const adTimerDisplay = document.getElementById("adTimer");
+const watchAdButton = document.getElementById("watchAd");
+const watchAdTimerDisplay = document.getElementById("watchAdTimer");
+
+// Função para calcular custo da construção usando a fórmula: (base × 2^1.05)^1.1
+function calculateConstructionCost(baseCost, level) {
+  return Math.floor(Math.pow(baseCost * Math.pow(2, 1.05), 1.1) * (level + 1));
+}
+
+// Função para calcular produção total por segundo
+function calculateLataPerSecond() {
+  let total = 0;
+  for (let i = 1; i <= 3; i++) {
+    total += constructions[i].level * constructions[i].baseProduction;
+  }
+  return total;
+}
+
+// Inicializar partículas de fundo
+function initParticles() {
+  for (let i = 0; i < 20; i++) {
+    createParticle();
+  }
+}
+
+function createParticle() {
+  const particle = document.createElement("div");
+  particle.classList.add("particle");
+  
+  const size = Math.random() * 10 + 5;
+  particle.style.width = `${size}px`;
+  particle.style.height = `${size}px`;
+  
+  particle.style.left = `${Math.random() * 100}vw`;
+  particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+  particle.style.animationDelay = `${Math.random() * 5}s`;
+  
+  particlesContainer.appendChild(particle);
+  
+  // Recriar partícula após animação
+  setTimeout(() => {
+    particle.remove();
+    createParticle();
+  }, 15000);
+}
+
+// Criar bolha de gás
+function createBubble() {
+  if (level < 5) return; // Só aparece a partir do nível 5
+  
+  const bubble = document.createElement("div");
+  bubble.classList.add("bubble");
+  
+  const size = Math.random() * 40 + 30;
+  bubble.style.width = `${size}px`;
+  bubble.style.height = `${size}px`;
+  
+  const left = Math.random() * (window.innerWidth - size);
+  bubble.style.left = `${left}px`;
+  
+  // Conteúdo da bolha (ícone de lata)
+  bubble.innerHTML = "🥤";
+  
+  // Adicionar a bolha ao corpo do documento
+  document.body.appendChild(bubble);
+  
+  // Evento de clique na bolha
+  bubble.addEventListener("click", () => {
+    const bonusPercentage = Math.random() * 0.3 + 0.2; // 20% a 50%
+    const bonusLatas = Math.floor((lataGain + (tampaLataLevel * 10)) * getLataMultiplier() * bonusPercentage);
+    latas += bonusLatas;
+    
+    showNotification(`+${bonusLatas} latas de bônus!`, 2000);
+    bubble.remove();
+    updateUI();
+    saveGame();
+  });
+  
+  // Remover a bolha após a animação terminar
+  setTimeout(() => {
+    if (bubble.parentNode) {
+      bubble.remove();
+    }
+  }, 10000);
+}
+
+// Agendar próxima bolha
+function scheduleNextBubble() {
+  const minTime = 10000; // 10 segundos
+  const maxTime = 30000; // 30 segundos
+  const nextTime = Math.random() * (maxTime - minTime) + minTime;
+  
+  setTimeout(() => {
+    createBubble();
+    scheduleNextBubble();
+  }, nextTime);
+}
+
+// Mostrar notificação
+function showNotification(message, duration = 2000) {
+  notification.textContent = message;
+  notification.classList.add("show");
+  
+  setTimeout(() => {
+    notification.classList.remove("show");
+  }, duration);
+}
+
+// Mostrar indicador de salvamento
+function showSaveIndicator() {
+  saveIndicator.classList.add("show");
+  
+  setTimeout(() => {
+    saveIndicator.classList.remove("show");
+  }, 1000);
+}
+
+// Criar efeito de clique
+function createClickEffect(x, y) {
+  const effect = document.createElement("div");
+  effect.classList.add("click-effect");
+  effect.style.left = `${x - 10}px`;
+  effect.style.top = `${y - 10}px`;
+  document.body.appendChild(effect);
+  
+  setTimeout(() => {
+    effect.remove();
+  }, 500);
+}
+
+// Mostrar texto de dano
+function showDamageText(damage, x, y, isCrit = false) {
+  const text = document.createElement("div");
+  text.classList.add("damage-text");
+  if (isCrit) text.classList.add("crit-text");
+  text.textContent = `-${Math.floor(damage)}`;
+  text.style.left = `${x}px`;
+  text.style.top = `${y}px`;
+  document.body.appendChild(text);
+  
+  setTimeout(() => {
+    text.remove();
+  }, 1000);
+}
+
+// Animação de pulso para a lata ao receber dano
+function pulseEnemy() {
+  enemy.style.animation = 'pulse 0.2s';
+  setTimeout(() => {
+    enemy.style.animation = '';
+  }, 200);
+}
+
+// Calcular dano dos amigos (1 + 10% do dano por clique + bônus de tampas)
+function calculateHelperDamage() {
+  const baseDamage = 1 + ((getGolesPorClique() + (tampaClickLevel * 5)) * 0.1);
+  const helperBonus = 1 + (tampaHelperLevel * 0.01);
+  return baseDamage * helperBonus * amigosLevel * damageMultiplier;
+}
+
+// Obter multiplicador de latas atual (incluindo boosts)
+function getLataMultiplier() {
+  return activeBoosts.lataGain.active ? lataMultiplier * activeBoosts.lataGain.multiplier : lataMultiplier;
+}
+
+// Obter goles por clique atual (incluindo boosts)
+function getGolesPorClique() {
+  return activeBoosts.clickPower.active ? golesPorClique * activeBoosts.clickPower.multiplier : golesPorClique;
+}
+
+// Atualizar boosts ativos
+function updateActiveBoosts() {
+  const now = Date.now();
+  
+  // Verificar se os boosts expiraram
+  if (activeBoosts.lataGain.active && now > activeBoosts.lataGain.endTime) {
+    activeBoosts.lataGain.active = false;
+    showNotification("Boost de Latas expirou!");
+  }
+  
+  if (activeBoosts.clickPower.active && now > activeBoosts.clickPower.endTime) {
+    activeBoosts.clickPower.active = false;
+    showNotification("Boost de Goles expirou!");
+  }
+  
+  // Atualizar display de boosts ativos
+  updateActiveBoostsDisplay();
+}
+
+// Atualizar display de boosts ativos
+function updateActiveBoostsDisplay() {
+  activeBoostsContainer.innerHTML = '';
+  
+  if (activeBoosts.lataGain.active || activeBoosts.clickPower.active) {
+    const boostTitle = document.createElement('div');
+    boostTitle.textContent = 'Boosts Ativos:';
+    boostTitle.style.marginBottom = '5px';
+    boostTitle.style.fontWeight = 'bold';
+    activeBoostsContainer.appendChild(boostTitle);
+    
+    if (activeBoosts.lataGain.active) {
+      const timeLeft = Math.ceil((activeBoosts.lataGain.endTime - Date.now()) / 1000 / 60);
+      const boostElement = document.createElement('div');
+      boostElement.classList.add('boost-indicator');
+      boostElement.textContent = `2X Latas (${timeLeft}m)`;
+      activeBoostsContainer.appendChild(boostElement);
+    }
+    
+    if (activeBoosts.clickPower.active) {
+      const timeLeft = Math.ceil((activeBoosts.clickPower.endTime - Date.now()) / 1000 / 60);
+      const boostElement = document.createElement('div');
+      boostElement.classList.add('boost-indicator');
+      boostElement.textContent = `2X Goles (${timeLeft}m)`;
+      activeBoostsContainer.appendChild(boostElement);
+    }
+  }
+}
+
+// Atualizar UI
+function updateUI() {
+  levelDisplay.textContent = `Nível: ${level}`;
+  lataDisplay.textContent = `Latas: ${Math.floor(latas)}`;
+  tampaDisplay.textContent = `Tampas: ${tampas}`;
+  pointsDisplay.textContent = `Pontos: ${points}`;
+  lataPerSecondDisplay.textContent = `Latas/s: ${calculateLataPerSecond().toFixed(1)}`;
+  healthBar.style.width = (enemyHp / enemyMaxHp * 100) + "%";
+  document.getElementById("critLevel").textContent = critLevel;
+  document.getElementById("critCost").textContent = critCost;
+  document.getElementById("clickPowerLevel").textContent = golesPorCliqueLevel;
+  document.getElementById("clickPowerCost").textContent = golesPorCliqueCost;
+  document.getElementById("lataGainLevel").textContent = lataGainLevel;
+  document.getElementById("lataGainCost").textContent = lataGainCost;
+  document.getElementById("lataMultiplierLevel").textContent = lataMultiplierLevel;
+  document.getElementById("lataMultiplierCost").textContent = lataMultiplierCost;
+  document.getElementById("damageMultiplierLevel").textContent = damageMultiplierLevel;
+  document.getElementById("damageMultiplierCost").textContent = damageMultiplierCost;
+  document.getElementById("buyHelper").textContent = `Comprar Amigos (${amigosCost} ponto${amigosCost>1?'s':''})`;
+  critAttr.textContent = Math.floor((critChance + (tampaCritLevel * 0.02)) * 100) + '%';
+  clickAttr.textContent = getGolesPorClique() + (tampaClickLevel * 5);
+  gainAttr.textContent = lataGain + (tampaLataLevel * 10);
+  lataMultiplierAttr.textContent = getLataMultiplier().toFixed(1) + 'x';
+  damageMultiplierAttr.textContent = damageMultiplier.toFixed(1) + 'x';
+  helperDpsAttr.textContent = calculateHelperDamage().toFixed(1);
+  
+  // Atualizar informações das construções
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById(`construction${i}Level`).textContent = constructions[i].level;
+    document.getElementById(`construction${i}Production`).textContent = constructions[i].baseProduction;
+    document.getElementById(`construction${i}Cost`).textContent = calculateConstructionCost(constructions[i].baseCost, constructions[i].level);
+  }
+  
+  // Mostrar botão de tampas se nível >= 50
+  if (level >= 50) {
+    ascendButton.style.display = "inline-block";
+    ascendButton.textContent = `TAMPAR (Nível ${level})`;
+    ascendButton.style.animation = "glow 2s infinite";
+  } else {
+    ascendButton.style.display = "none";
+    ascendButton.style.animation = "none";
+  }
+  
+  // Mostrar habilidade de multiplicador de dano a partir do nível 30
+  if (level >= 30) {
+    damageMultiplierSkill.style.display = "flex";
+  }
+  
+  // Atualizar estado do botão de anúncio
+  updateAdButton();
+  
+  // Atualizar estados dos botões
+  document.getElementById("buyCrit").disabled = latas < critCost || critLevel >= 25;
+  document.getElementById("buyClickPower").disabled = latas < golesPorCliqueCost || golesPorCliqueLevel >= 20;
+  document.getElementById("buyLataGain").disabled = latas < lataGainCost || lataGainLevel >= 100;
+  document.getElementById("buyLataMultiplier").disabled = latas < lataMultiplierCost || lataMultiplierLevel >= 10;
+  document.getElementById("buyDamageMultiplier").disabled = latas < damageMultiplierCost || damageMultiplierLevel >= 20;
+  document.getElementById("buyHelper").disabled = points < amigosCost || amigosLevel >= 50;
+  
+  // Atualizar botões das construções
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById(`buyConstruction${i}`).disabled = latas < calculateConstructionCost(constructions[i].baseCost, constructions[i].level);
+  }
+  
+  // Atualizar UI de tampas
+  tampaPointsDisplay.textContent = tampaPoints;
+  tampaLataLevelDisplay.textContent = tampaLataLevel;
+  tampaClickLevelDisplay.textContent = tampaClickLevel;
+  tampaCritLevelDisplay.textContent = tampaCritLevel;
+  tampaHelperLevelDisplay.textContent = tampaHelperLevel;
+  tampaLataCostDisplay.textContent = tampaLataCost;
+  tampaClickCostDisplay.textContent = tampaClickCost;
+  tampaCritCostDisplay.textContent = tampaCritCost;
+  tampaHelperCostDisplay.textContent = tampaHelperCost;
+  
+  document.getElementById("buyTampaLata").disabled = tampaPoints < tampaLataCost || tampaLataLevel >= 5;
+  document.getElementById("buyTampaClick").disabled = tampaPoints < tampaClickCost || tampaClickLevel >= 10;
+  document.getElementById("buyTampaCrit").disabled = tampaPoints < tampaCritCost || tampaCritLevel >= 25;
+  document.getElementById("buyTampaHelper").disabled = tampaPoints < tampaHelperCost || tampaHelperLevel >= 10;
+}
+
+// Atualizar botão de anúncio
+function updateAdButton() {
+  if (adCooldown > 0) {
+    adButton.disabled = true;
+    adButton.classList.add('cooldown');
+    
+    // Atualizar timer no botão
+    const minutes = Math.floor(adCooldown / 60);
+    const seconds = adCooldown % 60;
+    
+    // Verificar se já existe um timer, se não, criar
+    let timerElement = adButton.querySelector('.cooldown-timer');
+    if (!timerElement) {
+      timerElement = document.createElement('div');
+      timerElement.classList.add('cooldown-timer');
+      adButton.appendChild(timerElement);
+    }
+    
+    timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  } else {
+    adButton.disabled = false;
+    adButton.classList.remove('cooldown');
+    adButton.style.animation = "adGlow 2s infinite";
+    
+    // Remover timer se existir
+    const timerElement = adButton.querySelector('.cooldown-timer');
+    if (timerElement) {
+      timerElement.remove();
+    }
+  }
+}
+
+// Ataque ao inimigo
+function attack(event) {
+  let damage = (getGolesPorClique() + (tampaClickLevel * 5)) * damageMultiplier;
+  let isCrit = false;
+  
+  const totalCritChance = critChance + (tampaCritLevel * 0.02);
+  if (Math.random() < totalCritChance) {
+    damage *= critMultiplier;
+    isCrit = true;
+  }
+  
+  enemyHp -= damage;
+  
+  // Efeitos visuais
+  if (event) {
+    const rect = enemy.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    createClickEffect(event.clientX, event.clientY);
+    showDamageText(damage, x, y, isCrit);
+  }
+  
+  pulseEnemy();
+  
+  if (enemyHp <= 0) {
+    const latasGanhas = (lataGain + (tampaLataLevel * 10)) * getLataMultiplier();
+    latas += latasGanhas;
+    level++;
+    
+    // Ganhar pontos de habilidade a cada 5 níveis
+    if (level % 5 === 0) {
+      points++;
+      showNotification(`+1 Ponto de Habilidade!`);
+    }
+    
+    // Ganhar tampas a cada 25 níveis
+    if (level % 25 === 0) {
+      tampaPoints++;
+      showNotification(`+1 Tampa!`);
+    }
+    
+    enemyMaxHp = Math.floor(enemyMaxHp * 1.2 + 3);
+    enemyHp = enemyMaxHp;
+    
+    // Efeito especial ao subir de nível
+    enemy.style.boxShadow = "0 0 20px 5px gold";
+    setTimeout(() => {
+      enemy.style.boxShadow = "none";
+    }, 500);
+  }
+  
+  updateUI();
+}
+
+// Sistema de salvamento
+function saveGame() {
+  const saveData = {
+    latas, tampas, points, level, enemyMaxHp, enemyHp, golesPorClique, 
+    critChance, lataGain, lataMultiplier, damageMultiplier, amigosLevel, amigosCost, critLevel, 
+    golesPorCliqueLevel, lataGainLevel, lataMultiplierLevel, damageMultiplierLevel,
+    critCost, golesPorCliqueCost, lataGainCost, lataMultiplierCost, damageMultiplierCost,
+    tampaPoints, tampaLataLevel, tampaClickLevel, 
+    tampaCritLevel, tampaHelperLevel,
+    tampaLataCost, tampaClickCost, tampaCritCost, tampaHelperCost,
+    adCooldown, activeBoosts, constructions,
+    saveTime: Date.now()
+  };
+  
+  localStorage.setItem('sodaSave', JSON.stringify(saveData));
+  showSaveIndicator();
+  showNotification("Jogo salvo com sucesso!");
+}
+
+// Carregar jogo salvo
+function loadGame() {
+  const save = JSON.parse(localStorage.getItem('sodaSave'));
+  if (save) {
+    latas = save.latas || 0;
+    tampas = save.tampas || 0;
+    points = save.points || 0;
+    level = save.level || 1;
+    enemyMaxHp = save.enemyMaxHp || 10;
+    enemyHp = save.enemyHp || enemyMaxHp;
+    golesPorClique = save.golesPorClique || 1;
+    critChance = save.critChance || 0;
+    lataGain = save.lataGain || 1;
+    lataMultiplier = save.lataMultiplier || 1;
+    damageMultiplier = save.damageMultiplier || 1;
+    amigosLevel = save.amigosLevel || 0;
+    amigosCost = save.amigosCost || 1;
+    critLevel = save.critLevel || 0;
+    golesPorCliqueLevel = save.golesPorCliqueLevel || 1;
+    lataGainLevel = save.lataGainLevel || 1;
+    lataMultiplierLevel = save.lataMultiplierLevel || 0;
+    damageMultiplierLevel = save.damageMultiplierLevel || 0;
+    critCost = save.critCost || 1;
+    golesPorCliqueCost = save.golesPorCliqueCost || 1;
+    lataGainCost = save.lataGainCost || 1;
+    lataMultiplierCost = save.lataMultiplierCost || 10;
+    damageMultiplierCost = save.damageMultiplierCost || 50;
+    
+    // Carregar dados de tampas
+    tampaPoints = save.tampaPoints || 0;
+    tampaLataLevel = save.tampaLataLevel || 0;
+    tampaClickLevel = save.tampaClickLevel || 0;
+    tampaCritLevel = save.tampaCritLevel || 0;
+    tampaHelperLevel = save.tampaHelperLevel || 0;
+    tampaLataCost = save.tampaLataCost || 1;
+    tampaClickCost = save.tampaClickCost || 1;
+    tampaCritCost = save.tampaCritCost || 1;
+    tampaHelperCost = save.tampaHelperCost || 1;
+    
+    // Carregar dados de anúncio
+    adCooldown = save.adCooldown || 0;
+    activeBoosts = save.activeBoosts || {
+      lataGain: { active: false, endTime: 0, multiplier: 1 },
+      clickPower: { active: false, endTime: 0, multiplier: 1 }
+    };
+    
+    // Carregar dados de construções
+    if (save.constructions) {
+      constructions = save.constructions;
+    }
+    
+    showNotification("Jogo carregado!");
+  }
+}
+
+// Resetar completamente o jogo
+function resetGame() {
+  // Limpar o localStorage
+  localStorage.removeItem('sodaSave');
+  
+  // Reiniciar todas as variáveis
+  latas = 0;
+  tampas = 0;
+  points = 0;
+  level = 1;
+  enemyMaxHp = 10;
+  enemyHp = enemyMaxHp;
+  golesPorClique = 1;
+  critChance = 0;
+  lataGain = 1;
+  lataMultiplier = 1;
+  damageMultiplier = 1;
+  amigosLevel = 0;
+  amigosCost = 1;
+  critLevel = 0;
+  golesPorCliqueLevel = 1;
+  lataGainLevel = 1;
+  lataMultiplierLevel = 0;
+  damageMultiplierLevel = 0;
+  critCost = 1;
+  golesPorCliqueCost = 1;
+  lataGainCost = 1;
+  lataMultiplierCost = 10;
+  damageMultiplierCost = 50;
+  
+  // Reiniciar variáveis de tampas
+  tampaPoints = 0;
+  tampaLataLevel = 0;
+  tampaClickLevel = 0;
+  tampaCritLevel = 0;
+  tampaHelperLevel = 0;
+  tampaLataCost = 1;
+  tampaClickCost = 1;
+  tampaCritCost = 1;
+  tampaHelperCost = 1;
+  
+  // Reiniciar variáveis de anúncio
+  adCooldown = 0;
+  activeBoosts = {
+    lataGain: { active: false, endTime: 0, multiplier: 1 },
+    clickPower: { active: false, endTime: 0, multiplier: 1 }
+  };
+  
+  // Reiniciar construções
+  constructions = {
+    1: { level: 0, baseCost: 10, baseProduction: 0.1, name: "Máquina de Refrigerante" },
+    2: { level: 0, baseCost: 1000, baseProduction: 1, name: "Fábrica de Latas" },
+    3: { level: 0, baseCost: 100000, baseProduction: 10, name: "Complexo Industrial" }
+  };
+  
+  // Fechar menu de reset
+  resetMenu.classList.remove("open");
+  
+  // Mostrar mensagem
+  showNotification("Jogo resetado com sucesso!", 3000);
+  
+  // Atualizar UI
+  updateUI();
+}
+
+// Realizar tampas
+function performAscension() {
+  // Não adicionar tampas - apenas manter as tampas já ganhas
+  // Apenas aumentar o contador de tampas
+  tampas++;
+  
+  // Reiniciar o jogo mas manter as tampas e upgrades de tampas
+  latas = 0;
+  points = 0;
+  level = 1;
+  enemyMaxHp = 10;
+  enemyHp = enemyMaxHp;
+  golesPorClique = 1;
+  critChance = 0;
+  lataGain = 1;
+  lataMultiplier = 1;
+  damageMultiplier = 1;
+  amigosLevel = 0;
+  amigosCost = 1;
+  critLevel = 0;
+  golesPorCliqueLevel = 1;
+  lataGainLevel = 1;
+  lataMultiplierLevel = 0;
+  damageMultiplierLevel = 0;
+  critCost = 1;
+  golesPorCliqueCost = 1;
+  lataGainCost = 1;
+  lataMultiplierCost = 10;
+  damageMultiplierCost = 50;
+  
+  // Reiniciar construções
+  constructions = {
+    1: { level: 0, baseCost: 10, baseProduction: 0.1, name: "Máquina de Refrigerante" },
+    2: { level: 0, baseCost: 1000, baseProduction: 1, name: "Fábrica de Latas" },
+    3: { level: 0, baseCost: 100000, baseProduction: 10, name: "Complexo Industrial" }
+  };
+  
+  // Mostrar mensagem
+  showNotification(`Tampa realizada! Suas ${tampaPoints} tampas foram mantidas.`, 5000);
+  
+  // Fechar menu de tampas
+  ascensionMenu.classList.remove("open");
+  
+  // Atualizar UI
+  updateUI();
+}
+
+// Iniciar timer do anúncio
+function startAdTimer() {
+  adTimer = 15;
+  adTimerDisplay.textContent = adTimer;
+  watchAdTimerDisplay.textContent = adTimer;
+  watchAdButton.disabled = true;
+  watchAdButton.textContent = `AGUARDE... ${adTimer}`;
+  
+  // Limpar intervalo anterior se existir
+  if (adTimerInterval) {
+    clearInterval(adTimerInterval);
+  }
+  
+  // Iniciar novo intervalo
+  adTimerInterval = setInterval(() => {
+    adTimer--;
+    adTimerDisplay.textContent = adTimer;
+    watchAdTimerDisplay.textContent = adTimer;
+    watchAdButton.textContent = `AGUARDE... ${adTimer}`;
+    
+    if (adTimer <= 0) {
+      clearInterval(adTimerInterval);
+      watchAdButton.disabled = false;
+      watchAdButton.textContent = "RECEBER RECOMPENSA!";
+    }
+  }, 1000);
+}
+
+// Assistir anúncio
+function watchAd() {
+  // Verificar se o timer chegou a 0
+  if (adTimer > 0) {
+    showNotification("Aguarde o timer chegar a 0 para receber a recompensa!");
+    return;
+  }
+  
+  // Fechar menu de anúncio
+  adMenu.classList.remove("open");
+  
+  // Definir cooldown de 10 minutos (600 segundos)
+  adCooldown = 600;
+  
+  // Escolher recompensa aleatória
+  const rewards = ['lataGain', 'clickPower'];
+  const randomReward = rewards[Math.floor(Math.random() * rewards.length)];
+  
+  // Aplicar recompensa
+  if (randomReward === 'lataGain') {
+    activeBoosts.lataGain.active = true;
+    activeBoosts.lataGain.multiplier = 2;
+    activeBoosts.lataGain.endTime = Date.now() + (5 * 60 * 1000); // 5 minutos
+    showNotification("Recompensa: 2X Ganho de Latas por 5 minutos!", 5000);
+  } else {
+    activeBoosts.clickPower.active = true;
+    activeBoosts.clickPower.multiplier = 2;
+    activeBoosts.clickPower.endTime = Date.now() + (5 * 60 * 1000); // 5 minutos
+    showNotification("Recompensa: 2X Goles por Clique por 5 minutos!", 5000);
+  }
+  
+  // Atualizar UI
+  updateUI();
+  saveGame();
+}
+
+// Comprar construção
+function buyConstruction(id) {
+  const construction = constructions[id];
+  const cost = calculateConstructionCost(construction.baseCost, construction.level);
+  
+  if (latas >= cost) {
+    latas -= cost;
+    construction.level++;
+    showNotification(`${construction.name} comprada! Nível ${construction.level}`);
+    updateUI();
+    saveGame();
+  }
+}
+
+// Gerar latas das construções
+function generateConstructionIncome() {
+  const income = calculateLataPerSecond();
+  latas += income;
+  updateUI();
+}
+
+// Inicialização
+function init() {
+  loadGame();
+  initParticles();
+  updateUI();
+  scheduleNextBubble();
+  
+  // Atualizar cooldown do anúncio a cada segundo
+  setInterval(() => {
+    if (adCooldown > 0) {
+      adCooldown--;
+      updateAdButton();
+    }
+  }, 1000);
+  
+  // Atualizar boosts ativos a cada segundo
+  setInterval(() => {
+    updateActiveBoosts();
+    updateUI();
+  }, 1000);
+  
+  // Gerar renda das construções a cada segundo
+  setInterval(() => {
+    generateConstructionIncome();
+  }, 1000);
+  
+  // Ataque automático dos amigos
+  setInterval(() => { 
+    if (amigosLevel > 0) {
+      const helperDamage = calculateHelperDamage();
+      enemyHp -= helperDamage;
+      
+      if (enemyHp <= 0) {
+        const latasGanhas = (lataGain + (tampaLataLevel * 10)) * getLataMultiplier();
+        latas += latasGanhas;
+        level++;
+        
+        if (level % 5 === 0) {
+          points++;
+          showNotification(`+1 Ponto de Habilidade!`);
+        }
+        
+        if (level % 25 === 0) {
+          tampaPoints++;
+          showNotification(`+1 Tampa!`);
+        }
+        
+        enemyMaxHp = Math.floor(enemyMaxHp * 1.2 + 3);
+        enemyHp = enemyMaxHp;
+      }
+      
+      updateUI();
+    }
+  }, 1000);
+}
+
+// Event listeners
+enemy.addEventListener("click", attack);
+
+document.getElementById("treeButton").addEventListener("click", () => {
+  document.getElementById("skillMenu").classList.add("open");
+});
+
+document.getElementById("closeMenu").addEventListener("click", () => {
+  document.getElementById("skillMenu").classList.remove("open");
+});
+
+document.getElementById("constructionButton").addEventListener("click", () => {
+  document.getElementById("constructionMenu").classList.add("open");
+});
+
+document.getElementById("closeConstruction").addEventListener("click", () => {
+  document.getElementById("constructionMenu").classList.remove("open");
+});
+
+document.getElementById("closeAscension").addEventListener("click", () => {
+  ascensionMenu.classList.remove("open");
+});
+
+document.getElementById("closeReset").addEventListener("click", () => {
+  resetMenu.classList.remove("open");
+});
+
+document.getElementById("closeAd").addEventListener("click", () => {
+  // Fechar menu sem dar recompensa se o timer não chegou a 0
+  if (adTimer > 0) {
+    showNotification("Você fechou a caixa antes do tempo e não recebeu recompensa!");
+  }
+  adMenu.classList.remove("open");
+  // Limpar o intervalo do timer
+  if (adTimerInterval) {
+    clearInterval(adTimerInterval);
+  }
+});
+
+document.getElementById("saveButton").addEventListener("click", () => {
+  saveGame();
+});
+
+document.getElementById("resetButton").addEventListener("click", () => {
+  resetMenu.classList.add("open");
+});
+
+document.getElementById("cancelReset").addEventListener("click", () => {
+  resetMenu.classList.remove("open");
+});
+
+document.getElementById("confirmReset").addEventListener("click", () => {
+  resetGame();
+});
+
+document.getElementById("adButton").addEventListener("click", () => {
+  // Verificar se está em cooldown
+  if (adCooldown > 0) {
+    showNotification(`Aguarde ${Math.ceil(adCooldown/60)} minutos para assistir outro anúncio!`);
+    return;
+  }
+  
+  adMenu.classList.add("open");
+  startAdTimer();
+});
+
+document.getElementById("watchAd").addEventListener("click", () => {
+  watchAd();
+});
+
+// Event listeners para construções
+for (let i = 1; i <= 3; i++) {
+  document.getElementById(`buyConstruction${i}`).addEventListener("click", () => {
+    buyConstruction(i);
+  });
+}
+
+document.getElementById("ascendButton").addEventListener("click", () => {
+  ascensionMenu.classList.add("open");
+});
+
+document.getElementById("confirmAscension").addEventListener("click", () => {
+  performAscension();
+});
+
+document.getElementById("buyTampaLata").addEventListener("click", () => {
+  if (tampaPoints >= tampaLataCost && tampaLataLevel < 5) {
+    tampaPoints -= tampaLataCost;
+    tampaLataLevel++;
+    tampaLataCost = Math.ceil(tampaLataCost * 1.5);
+    showNotification(`+10 Ganho de Latas adquirido!`);
+    updateUI();
+    saveGame();
+  }
+});
+
+document.getElementById("buyTampaClick").addEventListener("click", () => {
+  if (tampaPoints >= tampaClickCost && tampaClickLevel < 10) {
+    tampaPoints -= tampaClickCost;
+    tampaClickLevel++;
+    tampaClickCost = Math.ceil(tampaClickCost * 1.5);
+    showNotification(`+5 Goles por Clique adquirido!`);
+    updateUI();
+    saveGame();
+  }
+});
+
+document.getElementById("buyTampaCrit").addEventListener("click", () => {
+  if (tampaPoints >= tampaCritCost && tampaCritLevel < 25) {
+    tampaPoints -= tampaCritCost;
+    tampaCritLevel++;
+    tampaCritCost = Math.ceil(tampaCritCost * 1.5);
+    showNotification(`+2% Chance Crítica adquirida!`);
+    updateUI();
+    saveGame();
+  }
+});
+
+document.getElementById("buyTampaHelper").addEventListener("click", () => {
+  if (tampaPoints >= tampaHelperCost && tampaHelperLevel < 10) {
+    tampaPoints -= tampaHelperCost;
+    tampaHelperLevel++;
+    tampaHelperCost = Math.ceil(tampaHelperCost * 1.5);
+    showNotification(`+1% Dano dos Amigos adquirido!`);
+    updateUI();
+    saveGame();
+  }
+});
+
+document.getElementById("buyHelper").addEventListener("click", () => {
+  if (points >= amigosCost && amigosLevel < 50) {
+    points -= amigosCost;
+    amigosLevel++;
+    amigosCost = Math.min(50, amigosCost + 1);
+    showNotification(`Amigo comprado! Nível ${amigosLevel}`);
+    updateUI();
+    saveGame();
+  }
+});
+
+document.getElementById("buyCrit").addEventListener("click", () => {
+  if (latas >= critCost && critLevel < 25) {
+    latas -= critCost;
+    critLevel++;
+    critChance = critLevel * 0.02;
+    critCost = Math.ceil(critCost * 1.3);
+    showNotification(`Chance crítica aumentada!`);
+    updateUI();
+    saveGame();
+  }
+});
+
+document.getElementById("buyClickPower").addEventListener("click", () => {
+  if (latas >= golesPorCliqueCost && golesPorCliqueLevel < 20) {
+    latas -= golesPorCliqueCost;
+    golesPorCliqueLevel++;
+    golesPorClique++;
+    golesPorCliqueCost = Math.ceil(golesPorCliqueCost * 1.3);
+    showNotification(`Goles por clique aumentado!`);
+    updateUI();
+    saveGame();
+  }
+});
+
+document.getElementById("buyLataGain").addEventListener("click", () => {
+  if (latas >= lataGainCost && lataGainLevel < 100) {
+    latas -= lataGainCost;
+    lataGainLevel++;
+    lataGain++;
+    lataGainCost = Math.ceil(lataGainCost * 1.3);
+    showNotification(`Ganho de latas aumentado!`);
+    updateUI();
+    saveGame();
+  }
+});
+
+document.getElementById("buyLataMultiplier").addEventListener("click", () => {
+  if (latas >= lataMultiplierCost && lataMultiplierLevel < 10) {
+    latas -= lataMultiplierCost;
+    lataMultiplierLevel++;
+    lataMultiplier *= 1.5;
+    lataMultiplierCost = Math.ceil(lataMultiplierCost * 2.0);
+    showNotification(`Multiplicador de latas aumentado para ${lataMultiplier.toFixed(1)}x!`);
+    updateUI();
+    saveGame();
+  }
+});
+
+document.getElementById("buyDamageMultiplier").addEventListener("click", () => {
+  if (latas >= damageMultiplierCost && damageMultiplierLevel < 20) {
+    latas -= damageMultiplierCost;
+    damageMultiplierLevel++;
+    damageMultiplier *= 1.3;
+    damageMultiplierCost = Math.ceil(damageMultiplierCost * 2.0);
+    showNotification(`Multiplicador de dano aumentado para ${damageMultiplier.toFixed(1)}x!`);
+    updateUI();
+    saveGame();
+  }
+});
+
+// Iniciar o jogo
+init();
+</script>
+
+</body>
+</html>
